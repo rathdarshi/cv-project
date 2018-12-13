@@ -4,17 +4,19 @@ import helper
 from train import train_nn,optimize
 
 num_classes = 2
+NUMBER_OF_CLASSES = 2
 image_shape = (160, 576)
-EPOCHS = 40
+IMAGE_SHAPE = (160,576)
+EPOCHS = 2
 BATCH_SIZE = 16
 DROPOUT = 0.75
 
 # Specify these directory paths
 
-data_dir = './data'
+data_dir = '../data_road'
 runs_dir = './runs'
-training_dir ='./data/data_road/training'
-vgg_path = './data/vgg'
+training_dir ='../data_road/training'
+vgg_path = '../vgg'
 
 #--------------------------
 # PLACEHOLDER TENSORS
