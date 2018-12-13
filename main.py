@@ -45,33 +45,81 @@ def load_vgg(sess, vgg_path):
 
   return image_input, keep_prob, layer3, layer4, layer7
 
-def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
+
+def conv_1x1(layer, layer_name):
+  """ Return the output of a 1x1 convolution of a layer """
+  return tf.layers.conv2d(inputs = layer,
+                          filters =  NUMBER_OF_CLASSES,
+                          kernel_size = (1, 1),
+                          strides = (1, 1),
+                          name = layer_name)
+
+
+def upsample(layer, k, s, layer_name):
+  """ Return the output of transpose convolution given kernel_size k and strides s """
+  return tf.layers.conv2d_transpose(inputs = layer,
+                                    filters = NUMBER_OF_CLASSES,
+                                    kernel_size = (k, k),
+                                    strides = (s, s),
+                                    padding = 'same',
+                                    name = layer_name)
+
+
+def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes = NUMBER_OF_CLASSES):
+  """
+  Create the layers for a fully convolutional network.  Build skip-layers using the vgg layers.
+  vgg_layerX_out: TF Tensor for VGG Layer X output
+  num_classes: Number of classes to classify
+  return: The Tensor for the last layer of output
+  """
+
+  # Use a shorter variable name for simplicity
+  layer3, layer4, layer7 = vgg_layer3_out, vgg_layer4_out, vgg_layer7_out
+
+  # Apply a 1x1 convolution to encoder layers
+  layer3x = conv_1x1(layer = layer3, layer_name = "layer3conv1x1")
+  layer4x = conv_1x1(layer = layer4, layer_name = "layer4conv1x1")
+  layer7x = conv_1x1(layer = layer7, layer_name = "layer7conv1x1")
+ 
+  # Add decoder layers to the network with skip connections and upsampling
+  # Note: the kernel size and strides are the same as the example in Udacity Lectures
+  #       Semantic Segmentation Scene Understanding Lesson 10-9: FCN-8 - Decoder
+  decoderlayer1 = upsample(layer = layer7x, k = 4, s = 2, layer_name = "decoderlayer1")
+  decoderlayer2 = tf.add(decoderlayer1, layer4x, name = "decoderlayer2")
+  decoderlayer3 = upsample(layer = decoderlayer2, k = 4, s = 2, layer_name = "decoderlayer3")
+  decoderlayer4 = tf.add(decoderlayer3, layer3x, name = "decoderlayer4")
+  decoderlayer_output = upsample(layer = decoderlayer4, k = 16, s = 8, layer_name = "decoderlayer_output")
+
+  return decoderlayer_output
+
+
+# def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
    
-    # Use a shorter variable name for simplicity
-    layer3, layer4, layer7 = vgg_layer3_out, vgg_layer4_out, vgg_layer7_out
+#     # Use a shorter variable name for simplicity
+#     layer3, layer4, layer7 = vgg_layer3_out, vgg_layer4_out, vgg_layer7_out
 
-    # Apply 1x1 convolution in place of fully connected layer
-    fcn8 = tf.layers.conv2d(layer7, filters=num_classes, kernel_size=1, name="fcn8")
+#     # Apply 1x1 convolution in place of fully connected layer
+#     fcn8 = tf.layers.conv2d(layer7, filters=num_classes, kernel_size=1, name="fcn8")
 
-    # Upsample fcn8 with size depth=(4096?) to match size of layer 4 so that we can add skip connection with 4th layer
-    fcn9 = tf.layers.conv2d_transpose(fcn8, filters=layer4.get_shape().as_list()[-1],
-    kernel_size=4, strides=(2, 2), padding='SAME', name="fcn9")
+#     # Upsample fcn8 with size depth=(4096?) to match size of layer 4 so that we can add skip connection with 4th layer
+#     fcn9 = tf.layers.conv2d_transpose(fcn8, filters=layer4.get_shape().as_list()[-1],
+#     kernel_size=4, strides=(2, 2), padding='SAME', name="fcn9")
 
-    # Add a skip connection between current final layer fcn8 and 4th layer
-    fcn9_skip_connected = tf.add(fcn9, layer4, name="fcn9_plus_vgg_layer4")
+#     # Add a skip connection between current final layer fcn8 and 4th layer
+#     fcn9_skip_connected = tf.add(fcn9, layer4, name="fcn9_plus_vgg_layer4")
 
-    # Upsample again
-    fcn10 = tf.layers.conv2d_transpose(fcn9_skip_connected, filters=layer3.get_shape().as_list()[-1],
-    kernel_size=4, strides=(2, 2), padding='SAME', name="fcn10_conv2d")
+#     # Upsample again
+#     fcn10 = tf.layers.conv2d_transpose(fcn9_skip_connected, filters=layer3.get_shape().as_list()[-1],
+#     kernel_size=4, strides=(2, 2), padding='SAME', name="fcn10_conv2d")
 
-    # Add skip connection
-    fcn10_skip_connected = tf.add(fcn10, layer3, name="fcn10_plus_vgg_layer3")
+#     # Add skip connection
+#     fcn10_skip_connected = tf.add(fcn10, layer3, name="fcn10_plus_vgg_layer3")
 
-    # Upsample again
-    fcn11 = tf.layers.conv2d_transpose(fcn10_skip_connected, filters=num_classes,
-    kernel_size=16, strides=(8, 8), padding='SAME', name="fcn11")
+#     # Upsample again
+#     fcn11 = tf.layers.conv2d_transpose(fcn10_skip_connected, filters=num_classes,
+#     kernel_size=16, strides=(8, 8), padding='SAME', name="fcn11")
 
-    return fcn11
+#     return fcn11
 
 
 
