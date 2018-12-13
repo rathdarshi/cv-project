@@ -22,7 +22,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
              cross_entropy_loss, input_image,
              correct_label, keep_prob, learning_rate):
 
-  keep_prob_value = 0.5
+  keep_prob_value = 0.75
   learning_rate_value = 0.001
   for epoch in range(epochs):
       # Create function to get batches
