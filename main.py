@@ -7,7 +7,7 @@ num_classes = 2
 NUMBER_OF_CLASSES = 2
 image_shape = (160, 576)
 IMAGE_SHAPE = (160,576)
-EPOCHS = 2
+EPOCHS = 20
 BATCH_SIZE = 16
 DROPOUT = 0.75
 
