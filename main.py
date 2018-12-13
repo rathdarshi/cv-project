@@ -7,7 +7,7 @@ num_classes = 2
 NUMBER_OF_CLASSES = 2
 image_shape = (160, 576)
 IMAGE_SHAPE = (160,576)
-EPOCHS = 40
+EPOCHS = 20
 BATCH_SIZE = 16
 DROPOUT = 0.75
 
@@ -85,10 +85,10 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes = NUMBER_
   # Note: the kernel size and strides are the same as the example in Udacity Lectures
   #       Semantic Segmentation Scene Understanding Lesson 10-9: FCN-8 - Decoder
   decoderlayer1 = upsample(layer = layer7x, k = 4, s = 2, layer_name = "decoderlayer1")
-  decoderlayer2 = tf.add(decoderlayer1, 0.5*layer4x, name = "decoderlayer2")
-  decoderlayer3 = upsample(layer = decoderlayer2, k = 4, s = 2, layer_name = "decoderlayer3")
-  decoderlayer4 = tf.add(decoderlayer3, 1.5*layer3x, name = "decoderlayer4")
-  decoderlayer_output = upsample(layer = decoderlayer4, k = 16, s = 8, layer_name = "decoderlayer_output")
+  # decoderlayer2 = tf.add(decoderlayer1, 0.5*layer4x, name = "decoderlayer2")
+  decoderlayer3 = upsample(layer = decoderlayer1, k = 4, s = 2, layer_name = "decoderlayer3")
+  # decoderlayer4 = tf.add(decoderlayer3, 1.5*layer3x, name = "decoderlayer4")
+  decoderlayer_output = upsample(layer = decoderlayer3, k = 16, s = 8, layer_name = "decoderlayer_output")
 
   return decoderlayer_output
 
