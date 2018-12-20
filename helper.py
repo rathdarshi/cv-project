@@ -140,7 +140,7 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
                 street_im = scipy.misc.toimage(image)
                 street_im.paste(mask, box=None, mask=mask)
 
-                yield os.path.basename(image_file), np.array(street_im)
+                yield os.path.basename(image_file), np.array(street_im), np.array(mask)
 
 
 def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image):
@@ -164,6 +164,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
         print('Training Finished. Saving test images to: {}'.format(output_dir))
         image_outputs = gen_test_output(
                 sess, logits, keep_prob, input_image, os.path.join('../data_road/testing'), image_shape)
-        for name, image in image_outputs:
+        for name, image,mask in image_outputs:
             #print("hey")
             scipy.misc.imsave(os.path.join(output_dir, name), image)
+            scipy.misc.imsave(os.path.join(output_dir,'mask_'+name), mask)
